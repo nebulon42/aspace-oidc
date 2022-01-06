@@ -1,0 +1,4 @@
+de:
+  plugins:
+    aspace-oidc:
+      login_with: Mit %{provider} anmelden
