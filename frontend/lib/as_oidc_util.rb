@@ -36,8 +36,8 @@ module ASOidcUtil
       groups = self.get_field(auth, config[:groups_field])
       if groups.length() > 0
         if config.key?(:group_mapping)
-          if config[:group_mapping].key?(:admin) && groups.include?(config[:group_mapping][:admin])
-            aspace_groups['admin'] = Hash['repository' => 1, 'group' => 1]
+          if config[:group_mapping].key?(:admin) && groups.include?(config[:group_mapping][:admin][:mapping])
+            aspace_groups['admin'] = Hash['repository' => config[:group_mapping][:admin][:repository], 'group' => config[:group_mapping][:admin][:group]]
           end
           if config[:group_mapping].key?(:repositories)
             config[:group_mapping][:repositories].each do |item|
@@ -63,7 +63,6 @@ module ASOidcUtil
         end
       end
 
-      puts oidc_config
       if oidc_config && oidc_config.key?(:show_login_form)
         show_login_form = oidc_config[:show_login_form]
       end

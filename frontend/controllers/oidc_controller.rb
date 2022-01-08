@@ -35,7 +35,6 @@ class OidcController < ApplicationController
         username = username.split('@').first.downcase
       end
       
-      puts "#{auth_hash}"
       Log.debug("Aspace OIDC: Received callback for user #{username}.")
       if username && email
         aspace_groups = ASOidcUtil.get_aspace_groups(auth_hash, oidc_config)
@@ -48,7 +47,6 @@ class OidcController < ApplicationController
           deny_without_group = oidc_config[:group_mapping][:deny_without_group]
         end
         if deny_without_group == false || aspace_groups.length() > 0
-          puts 'calling login'
           backend_session = User.login(username, pw)
 
           if backend_session

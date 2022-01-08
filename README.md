@@ -28,7 +28,11 @@ AppConfig[:authentication_sources] = [
     groups_field: 'extra.raw_info.groups',
     group_mapping: {
       deny_without_group: true,
-      admin: '/my/admin/group',
+      admin: {
+        mapping: '/my/admin/group',
+        group: 1,
+        repository: 1
+      },
       repositories: [
         {
           mapping: '/my/archivesspace/my_repo/repository-managers',
