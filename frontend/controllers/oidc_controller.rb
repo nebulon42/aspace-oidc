@@ -43,8 +43,8 @@ class OidcController < ApplicationController
         auth_hash[:info][:groups] = aspace_groups
         File.open(pw_path, 'w') { |f| f.write(JSON.generate(auth_hash)) }
         deny_without_group = true
-        if oidc_config.key?(:group_mapping) && oidc_config[:group_mapping].key?(:deny_without_group)
-          deny_without_group = oidc_config[:group_mapping][:deny_without_group]
+        if oidc_config.key?(:role_mapping) && oidc_config[:role_mapping].key?(:deny_without_group)
+          deny_without_group = oidc_config[:role_mapping][:deny_without_group]
         end
         if deny_without_group == false || aspace_groups.length() > 0
           backend_session = User.login(username, pw)

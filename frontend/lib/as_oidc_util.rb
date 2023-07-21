@@ -32,16 +32,16 @@ module ASOidcUtil
 
   def self.get_aspace_groups(auth, config)
     aspace_groups = Hash.new
-    if config.key?(:groups_field)
-      groups = self.get_field(auth, config[:groups_field])
-      if groups.length() > 0
-        if config.key?(:group_mapping)
-          if config[:group_mapping].key?(:admin) && groups.include?(config[:group_mapping][:admin][:mapping])
-            aspace_groups['admin'] = Hash['repository' => config[:group_mapping][:admin][:repository], 'group' => config[:group_mapping][:admin][:group]]
+    if config.key?(:roles_field)
+      roles = self.get_field(auth, config[:roles_field])
+      if roles.length() > 0
+        if config.key?(:role_mapping)
+          if config[:role_mapping].key?(:admin) && groups.include?(config[:role_mapping][:admin][:mapping])
+            aspace_groups['admin'] = Hash['repository' => config[:role_mapping][:admin][:repository], 'group' => config[:role_mapping][:admin][:group]]
           end
-          if config[:group_mapping].key?(:repositories)
-            config[:group_mapping][:repositories].each do |item|
-              if groups.include?(item[:mapping])
+          if config[:role_mapping].key?(:repositories)
+            config[:role_mapping][:repositories].each do |item|
+              if roles.include?(item[:mapping])
                 aspace_groups[item[:mapping]] = Hash['repository' => item[:repository], 'group' => item[:group]]
               end
             end
