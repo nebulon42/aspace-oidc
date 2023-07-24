@@ -25,8 +25,8 @@ AppConfig[:authentication_sources] = [
     label: 'My IDP',
     show_login_form: false,
     username_field: 'extra.raw_info.preferred_username',
-    groups_field: 'extra.raw_info.groups',
-    group_mapping: {
+    roles_field: 'extra.raw_info.groups',
+    role_mapping: {
       deny_without_group: true,
       admin: {
         mapping: '/my/admin/group',
@@ -43,10 +43,10 @@ AppConfig[:authentication_sources] = [
     },
     config: {
       name: 'keycloak',
-      issuer: 'https://my.idp.com/auth/realms/Realm',
+      issuer: 'https://my.idp.com/realms/Realm',
       discovery: true,
       send_nonce: false,
-      scope: [:openid, :profile, :email, :groups],
+      scope: [:openid, :profile, :email],
       client_options: {
         redirect_uri: 'http://localhost:3000/auth/keycloak/callback',
         identifier: 'archivesspace',

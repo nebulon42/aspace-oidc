@@ -36,7 +36,7 @@ module ASOidcUtil
       roles = self.get_field(auth, config[:roles_field])
       if roles.length() > 0
         if config.key?(:role_mapping)
-          if config[:role_mapping].key?(:admin) && groups.include?(config[:role_mapping][:admin][:mapping])
+          if config[:role_mapping].key?(:admin) && roles.include?(config[:role_mapping][:admin][:mapping])
             aspace_groups['admin'] = Hash['repository' => config[:role_mapping][:admin][:repository], 'group' => config[:role_mapping][:admin][:group]]
           end
           if config[:role_mapping].key?(:repositories)
