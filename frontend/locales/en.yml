@@ -2,3 +2,6 @@ en:
   plugins:
     aspace-oidc:
       login_with: Login with %{provider}
+      config_error: There was a problem with the login configuration.
+      permission_error: You do not have permissions to login.
+      login_error: There was a problem when logging in the user.

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'log'
+
 class ASOidcException < StandardError
 end
 
@@ -21,12 +23,15 @@ class ASOidc
   # The file and contents are checked to verify the user.
   def authenticate(username, password)
     return nil unless password.start_with?("aspace-oidc-#{@provider}")
+    Log.debug("Aspace OIDC: Password matched expected format.")
 
     pw_path = File.join(Dir.tmpdir, password)
     return nil unless File.exist? pw_path
+    Log.debug("Aspace OIDC: Password file did exist.")
 
     info = JSON.parse(File.read(pw_path))['info']
     return nil unless username == info['username'].downcase
+    Log.debug("Aspace OIDC: Username in password file did match given user.")
 
     user_groups = []
     info['groups'].each do |key,item|

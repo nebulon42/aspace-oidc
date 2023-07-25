@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'log'
+
 module ASOidcUtil
   def self.get_email(auth)
     email = nil
@@ -11,6 +13,9 @@ module ASOidcUtil
       if auth[:extra][:response_object].name_id
         email = auth[:extra][:response_object].name_id
       end
+    end
+    if email == nil
+      Log.debug("Aspace OIDC: Was not able to retrieve e-mail from token.")
     end
     email
   end
@@ -45,9 +50,17 @@ module ASOidcUtil
                 aspace_groups[item[:mapping]] = Hash['repository' => item[:repository], 'group' => item[:group]]
               end
             end
+          else
+            Log.debug("Aspace OIDC: Did not find repositories config setting in role mapping.")
           end
+        else
+          Log.debug("Aspace OIDC: Did not find role mapping config setting.")
         end
+      else
+        Log.debug("Aspace OIDC: No roles were found in the token.")
       end
+    else
+      Log.debug("Aspace OIDC: Did not find roles field config setting.")
     end
     aspace_groups
   end

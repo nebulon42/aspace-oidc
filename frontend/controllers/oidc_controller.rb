@@ -15,19 +15,30 @@ class OidcController < ApplicationController
     pw_path = File.join(Dir.tmpdir, pw)
     backend_session = nil
     oidc_config = nil
-    if AppConfig[:oidc_definitions]
-      AppConfig[:oidc_definitions].each do |oidc_definition|
-        if oidc_definition[:config][:name] == auth_hash[:provider]
-          oidc_config = oidc_definition
-          break
+    if AppConfig[:oidc_definitions].respond_to?('each')
+      AppConfig[:oidc_definitions].each do |oidc_definition, idx|
+        if oidc_definition.key?(:config) && oidc_definition[:config].key?(:name)
+          Log.debug("Aspace OIDC: Processing configuration for provider #{oidc_definition[:config][:name]}.")
+          if oidc_definition[:config][:name] == auth_hash[:provider]
+            oidc_config = oidc_definition
+            Log.debug("Aspace OIDC: Found configuration for provider #{auth_hash[:provider]}.")
+            break
+          end
+        else
+          Log.warn("Aspace OIDC: Configuration ##{idx} is malformed.")
         end
       end
+    else
+      Log.error("Aspace OIDC: OIDC definitions are not set (correctly) in the application config.")
     end
 
     if oidc_config
       email = ASOidcUtil.get_email(auth_hash)
       if oidc_config.key?(:username_field)
         username = ASOidcUtil.get_field(auth_hash, oidc_config[:username_field])
+        if username == nil
+          Log.debug("Aspace OIDC: Was not able to retrieve username from token.")
+        end
       else
         username = email
         # usernames cannot be email addresses (legacy) and will be downcased:
@@ -38,6 +49,7 @@ class OidcController < ApplicationController
       Log.debug("Aspace OIDC: Received callback for user #{username}.")
       if username && email
         aspace_groups = ASOidcUtil.get_aspace_groups(auth_hash, oidc_config)
+        Log.debug("Aspace OIDC: Assigned groups are #{aspace_groups}.")
         auth_hash[:info][:username] = username # set username, checked in backend
         auth_hash[:info][:email] = email # ensure email is set in info
         auth_hash[:info][:groups] = aspace_groups
@@ -46,6 +58,7 @@ class OidcController < ApplicationController
         if oidc_config.key?(:role_mapping) && oidc_config[:role_mapping].key?(:deny_without_group)
           deny_without_group = oidc_config[:role_mapping][:deny_without_group]
         end
+        Log.debug("Aspace OIDC: deny without group setting is #{deny_without_group}.")
         if deny_without_group == false || aspace_groups.length() > 0
           backend_session = User.login(username, pw)
 
@@ -53,18 +66,24 @@ class OidcController < ApplicationController
             User.establish_session(self, backend_session, username)
             load_repository_list
           else
-            flash[:error] = 'Authentication error, unable to login.'
+            Log.error("Aspace OIDC: Did not receive backend session. Login problem in backend.")
+            flash[:error] = I18n.t("plugins.aspace-oidc.login_error")
           end
     
           File.delete pw_path if File.exist? pw_path
         else
-          flash[:error] = 'You do not have permissions to login.'
+          Log.debug("Aspace OIDC: No groups were assigned to user #{username} and login without group assignment is prohibited.")
+          flash[:error] = I18n.t("plugins.aspace-oidc.permission_error")
         end
+      else
+        Log.error("Aspace OIDC: Either username or e-mail are not set. Cannot continue.")
       end
     else
-      flash[:error] = 'Could not retrieve OIDC configuration.'
+      Log.error("Aspace OIDC: Could not retrieve configuration for this provider.")
+      flash[:error] = I18n.t("plugins.aspace-oidc.config_error")
     end
 
+    Log.debug("Aspace OIDC: Login for user #{username} was successful. Redirecting.")
     redirect_to controller: :welcome, action: :index
   end
 
