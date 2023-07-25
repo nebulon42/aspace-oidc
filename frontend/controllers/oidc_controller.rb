@@ -83,7 +83,6 @@ class OidcController < ApplicationController
       flash[:error] = I18n.t("plugins.aspace-oidc.config_error")
     end
 
-    Log.debug("Aspace OIDC: Login for user #{username} was successful. Redirecting.")
     redirect_to controller: :welcome, action: :index
   end
 
